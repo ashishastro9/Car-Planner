@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoFinance Pro — Car Buying Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* =============================================
+CSS CUSTOM PROPERTIES & THEME SYSTEM
+============================================= */
+:root {
+--accent: #00e5a0;
+--accent-dim: #00b87d;
+--accent-glow: rgba(0, 229, 160, 0.18);
+--danger: #ff5757;
+--warn: #ffb020;
+--info: #3d9eff;
+
+--font-display: 'Syne', sans-serif;
+--font-body: 'DM Sans', sans-serif;
+--font-mono: 'DM Mono', monospace;
+
+--radius-sm: 8px;
+--radius-md: 14px;
+--radius-lg: 22px;
+--radius-xl: 32px;
+
+--transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+--transition-slow: 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="dark"] {
+--bg-base: #0a0c0f;
+--bg-surface: #111418;
+--bg-card: #161b22;
+--bg-card-hover: #1c2330;
+--bg-input: #1a2030;
+--bg-glass: rgba(22, 27, 34, 0.72);
+--border: rgba(255,255,255,0.07);
+--border-focus: rgba(0, 229, 160, 0.45);
+--text-primary: #f0f4f8;
+--text-secondary: #8b9ab0;
+--text-muted: #4a5568;
+--shadow-card: 0 4px 32px rgba(0,0,0,0.45);
+--shadow-glow: 0 0 40px rgba(0, 229, 160, 0.12);
+--grid-line: rgba(255,255,255,0.03);
+}
+
+[data-theme="light"] {
+--bg-base: #f0f2f5;
+--bg-surface: #f7f8fa;
+--bg-card: #ffffff;
+--bg-card-hover: #f8faff;
+--bg-input: #f0f3fa;
+--bg-glass: rgba(255, 255, 255, 0.82);
+--border: rgba(0,0,0,0.08);
+--border-focus: rgba(0, 180, 125, 0.5);
+--text-primary: #0f1923;
+--text-secondary: #5a6778;
+--text-muted: #9aaabb;
+--shadow-card: 0 4px 24px rgba(0,0,0,0.08);
+--shadow-glow: 0 0 40px rgba(0, 180, 125, 0.08);
+--grid-line: rgba(0,0,0,0.03);
+}
+
+/* =============================================
+RESET & BASE
+============================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+font-family: var(--font-body);
+background: var(--bg-base);
+color: var(--text-primary);
+min-height: 100vh;
+line-height: 1.6;
+overflow-x: hidden;
+transition: background var(--transition-slow), color var(--transition-slow);
+}
+
+/* Background grid */
+body::before {
+content: '';
+position: fixed;
+inset: 0;
+background-image:
+linear-gradient(var(--grid-line) 1px, transparent 1px),
+linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+background-size: 48px 48px;
+pointer-events: none;
+z-index: 0;
+}
+
+/* =============================================
+TYPOGRAPHY
+============================================= */
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.2; }
+
+.mono { font-family: var(--font-mono); }
+
+/* =============================================
+LAYOUT
+============================================= */
+.app-wrapper {
+position: relative;
+z-index: 1;
+max-width: 1280px;
+margin: 0 auto;
+padding: 0 20px 80px;
+}
+
+/* =============================================
+TOP NAV / HEADER
+============================================= */
+.top-nav {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 20px 0 16px;
+position: sticky;
+top: 0;
+z-index: 100;
+background: var(--bg-glass);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border-bottom: 1px solid var(--border);
+margin: 0 -20px;
+padding: 16px 24px;
+transition: background var(--transition-slow);
+}
+
+.nav-brand {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.brand-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+}
+
+.brand-name {
+font-family: var(--font-display);
+font-weight: 800;
+font-size: 1.15rem;
+letter-spacing: -0.5px;
+}
+
+.brand-name span { color: var(--accent); }
+
+.nav-actions {
+display: flex;
+align-items: center;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.btn-icon {
+background: var(--bg-card);
+border: 1px solid var(--border);
+color: var(--text-secondary);
+padding: 8px 14px;
+border-radius: var(--radius-sm);
+cursor: pointer;
+font-family: var(--font-body);
+font-size: 0.82rem;
+font-weight: 500;
+transition: all var(--transition);
+display: flex;
+align-items: center;
+gap: 6px;
+white-space: nowrap;
+}
+
+.btn-icon:hover {
+background: var(--bg-card-hover);
+color: var(--text-primary);
+border-color: var(--border-focus);
+}
+
+.btn-accent {
+background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+border: none;
+color: #0a2a1a;
+font-weight: 700;
+padding: 8px 18px;
+border-radius: var(--radius-sm);
+cursor: pointer;
+font-family: var(--font-body);
+font-size: 0.82rem;
+transition: all var(--transition);
+display: flex;
+align-items: center;
+gap: 6px;
+white-space: nowrap;
+}
+
+.btn-accent:hover {
+opacity: 0.88;
+transform: translateY(-1px);
+box-shadow: 0 6px 20px rgba(0, 229, 160, 0.35);
+}
+
+/* =============================================
+HERO
+============================================= */
+.hero {
+padding: 48px 0 40px;
+text-align: center;
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+background: var(--accent-glow);
+border: 1px solid rgba(0, 229, 160, 0.2);
+color: var(--accent);
+padding: 5px 14px;
+border-radius: 100px;
+font-size: 0.78rem;
+font-weight: 600;
+letter-spacing: 0.5px;
+text-transform: uppercase;
+margin-bottom: 16px;
+}
+
+.hero h1 {
+font-size: clamp(2rem, 5vw, 3.4rem);
+font-weight: 800;
+letter-spacing: -1.5px;
+margin-bottom: 14px;
+background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero p {
+color: var(--text-secondary);
+font-size: 1.05rem;
+max-width: 520px;
+margin: 0 auto;
+}
+
+/* =============================================
+SECTION NAV TABS
+============================================= */
+.section-tabs {
+display: flex;
+gap: 6px;
+overflow-x: auto;
+padding-bottom: 4px;
+margin-bottom: 32px;
+scrollbar-width: none;
+}
+
+.section-tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+background: var(--bg-card);
+border: 1px solid var(--border);
+color: var(--text-secondary);
+padding: 9px 18px;
+border-radius: 100px;
+cursor: pointer;
+font-family: var(--font-body);
+font-size: 0.83rem;
+font-weight: 500;
+transition: all var(--transition);
+white-space: nowrap;
+flex-shrink: 0;
+}
+
+.tab-btn:hover { color: var(--text-primary); border-color: var(--border-focus); }
+.tab-btn.active {
+background: var(--accent);
+color: #0a2a1a;
+border-color: var(--accent);
+font-weight: 700;
+}
+
+/* =============================================
+MAIN GRID
+============================================= */
+.main-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+}
+
+.col-full { grid-column: 1 / -1; }
+.col-left { grid-column: 1; }
+.col-right { grid-column: 2; }
+
+/* =============================================
+CARD COMPONENT
+============================================= */
+.card {
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: var(--radius-lg);
+padding: 28px;
+box-shadow: var(--shadow-card);
+transition: all var(--transition-slow);
+position: relative;
+overflow: hidden;
+}
+
+.card::before {
+content: '';
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 2px;
+background: linear-gradient(90deg, transparent, var(--accent), transparent);
+opacity: 0;
+transition: opacity var(--transition);
+}
+
+.card:hover::before { opacity: 0.6; }
+.card:hover { box-shadow: var(--shadow-card), var(--shadow-glow); }
+
+.card-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 22px;
+}
+
+.card-title {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.card-icon {
+width: 34px; height: 34px;
+background: var(--accent-glow);
+border-radius: var(--radius-sm);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 15px;
+flex-shrink: 0;
+}
+
+.card-title h2 {
+font-size: 1.02rem;
+font-weight: 700;
+letter-spacing: -0.3px;
+}
+
+.card-badge {
+font-size: 0.72rem;
+font-weight: 600;
+padding: 3px 10px;
+border-radius: 100px;
+letter-spacing: 0.3px;
+}
+
+.badge-green { background: rgba(0,229,160,0.12); color: var(--accent); }
+.badge-warn { background: rgba(255,176,32,0.12); color: var(--warn); }
+.badge-info { background: rgba(61,158,255,0.12); color: var(--info); }
+
+/* =============================================
+FORM ELEMENTS
+============================================= */
+.field-group {
+margin-bottom: 18px;
+}
+
+.field-label {
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 0.8rem;
+font-weight: 600;
+color: var(--text-secondary);
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 8px;
+}
+
+.tooltip-icon {
+width: 16px; height: 16px;
+border-radius: 50%;
+background: var(--bg-input);
+border: 1px solid var(--border);
+display: inline-flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+color: var(--text-muted);
+cursor: help;
+position: relative;
+}
+
+.tooltip-icon:hover::after {
+content: attr(data-tip);
+position: absolute;
+bottom: calc(100% + 8px);
+left: 50%;
+transform: translateX(-50%);
+background: var(--bg-card-hover);
+border: 1px solid var(--border);
+color: var(--text-primary);
+padding: 8px 12px;
+border-radius: var(--radius-sm);
+font-size: 0.75rem;
+white-space: nowrap;
+z-index: 200;
+font-weight: 400;
+text-transform: none;
+letter-spacing: 0;
+pointer-events: none;
+box-shadow: var(--shadow-card);
+}
+
+.input-wrapper {
+position: relative;
+}
+
+.input-prefix {
+position: absolute;
+left: 14px;
+top: 50%;
+transform: translateY(-50%);
+color: var(--text-muted);
+font-family: var(--font-mono);
+font-size: 0.88rem;
+pointer-events: none;
+}
+
+.input-field {
+width: 100%;
+background: var(--bg-input);
+border: 1px solid var(--border);
+color: var(--text-primary);
+padding: 11px 14px;
+border-radius: var(--radius-sm);
+font-family: var(--font-mono);
+font-size: 0.95rem;
+font-weight: 500;
+transition: all var(--transition);
+outline: none;
+appearance: none;
+-webkit-appearance: none;
+}
+
+.input-field.has-prefix { padding-left: 30px; }
+
+.input-field:focus {
+border-color: var(--border-focus);
+background: var(--bg-card);
+box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-field::placeholder { color: var(--text-muted); font-weight: 400; }
+
+select.input-field {
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b9ab0' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+background-repeat: no-repeat;
+background-position: right 14px center;
+padding-right: 36px;
+cursor: pointer;
+}
+
+/* Slider */
+.slider-row {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.slider-track {
+flex: 1;
+position: relative;
+height: 6px;
+background: var(--bg-input);
+border-radius: 100px;
+cursor: pointer;
+}
+
+.slider-fill {
+position: absolute;
+left: 0; top: 0; bottom: 0;
+background: linear-gradient(90deg, var(--accent), var(--accent-dim));
+border-radius: 100px;
+pointer-events: none;
+transition: width 0.1s;
+}
+
+input[type=range] {
+position: absolute;
+inset: -6px 0;
+width: 100%;
+height: calc(100% + 12px);
+opacity: 0;
+cursor: pointer;
+z-index: 2;
+}
+
+.slider-thumb {
+position: absolute;
+top: 50%;
+transform: translate(-50%, -50%);
+width: 18px; height: 18px;
+background: var(--accent);
+border-radius: 50%;
+border: 3px solid var(--bg-card);
+box-shadow: 0 0 0 2px var(--accent);
+pointer-events: none;
+z-index: 1;
+transition: transform var(--transition);
+}
+
+.slider-track:active .slider-thumb,
+.slider-track:hover .slider-thumb {
+transform: translate(-50%, -50%) scale(1.2);
+}
+
+.slider-value {
+font-family: var(--font-mono);
+font-size: 0.88rem;
+font-weight: 500;
+color: var(--accent);
+min-width: 52px;
+text-align: right;
+}
+
+.slider-input {
+background: var(--bg-input);
+border: 1px solid var(--border);
+color: var(--text-primary);
+padding: 6px 10px;
+border-radius: var(--radius-sm);
+font-family: var(--font-mono);
+font-size: 0.85rem;
+width: 70px;
+text-align: right;
+outline: none;
+transition: all var(--transition);
+}
+
+.slider-input:focus {
+border-color: var(--border-focus);
+box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* =============================================
+SUMMARY STAT BOXES
+============================================= */
+.stat-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+gap: 12px;
+margin-top: 20px;
+}
+
+.stat-box {
+background: var(--bg-input);
+border: 1px solid var(--border);
+border-radius: var(--radius-md);
+padding: 16px;
+transition: all var(--transition);
+position: relative;
+overflow: hidden;
+}
+
+.stat-box::after {
+content: '';
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 2px;
+border-radius: 0 0 var(--radius-md) var(--radius-md);
+background: var(--stat-color, var(--accent));
+opacity: 0.7;
+}
+
+.stat-label {
+font-size: 0.72rem;
+font-weight: 600;
+color: var(--text-muted);
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 6px;
+}
+
+.stat-value {
+font-family: var(--font-mono);
+font-size: 1.15rem;
+font-weight: 700;
+color: var(--text-primary);
+letter-spacing: -0.5px;
+}
+
+.stat-sub {
+font-size: 0.72rem;
+color: var(--text-muted);
+margin-top: 3px;
+}
+
+.stat-accent { --stat-color: var(--accent); color: var(--accent); }
+.stat-warn { --stat-color: var(--warn); }
+.stat-danger { --stat-color: var(--danger); }
+.stat-info { --stat-color: var(--info); }
+
+/* =============================================
+STICKY SUMMARY
+============================================= */
+.sticky-summary {
+position: sticky;
+top: 75px;
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: var(--radius-lg);
+padding: 24px;
+box-shadow: var(--shadow-card), var(--shadow-glow);
+transition: all var(--transition-slow);
+}
+
+.sticky-title {
+font-family: var(--font-display);
+font-size: 0.9rem;
+font-weight: 700;
+color: var(--text-secondary);
+text-transform: uppercase;
+letter-spacing: 0.8px;
+margin-bottom: 18px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.sticky-title::before {
+content: '';
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(--accent);
+display: inline-block;
+animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.summary-line {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 9px 0;
+border-bottom: 1px solid var(--border);
+font-size: 0.85rem;
+}
+
+.summary-line:last-child { border-bottom: none; }
+
+.summary-line .label { color: var(--text-secondary); }
+.summary-line .val {
+font-family: var(--font-mono);
+font-weight: 600;
+color: var(--text-primary);
+}
+
+.summary-total {
+margin-top: 14px;
+padding: 14px;
+background: var(--accent-glow);
+border: 1px solid rgba(0, 229, 160, 0.2);
+border-radius: var(--radius-md);
+text-align: center;
+}
+
+.summary-total .label {
+font-size: 0.75rem;
+color: var(--accent);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 4px;
+}
+
+.summary-total .big-val {
+font-family: var(--font-mono);
+font-size: 1.6rem;
+font-weight: 700;
+color: var(--text-primary);
+letter-spacing: -1px;
+}
+
+/* =============================================
+PLANS COMPARISON
+============================================= */
+.plans-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 12px;
+margin-top: 16px;
+}
+
+.plan-card {
+background: var(--bg-input);
+border: 1px solid var(--border);
+border-radius: var(--radius-md);
+padding: 18px;
+transition: all var(--transition);
+position: relative;
+cursor: pointer;
+}
+
+.plan-card:hover { border-color: var(--border-focus); }
+.plan-card.recommended {
+border-color: rgba(0, 229, 160, 0.35);
+background: rgba(0, 229, 160, 0.04);
+}
+
+.plan-name {
+font-size: 0.78rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom: 4px;
+}
+
+.plan-card.aggressive .plan-name { color: var(--danger); }
+.plan-card.balanced .plan-name { color: var(--accent); }
+.plan-card.comfort .plan-name { color: var(--info); }
+
+.plan-emi {
+font-family: var(--font-mono);
+font-size: 1.25rem;
+font-weight: 700;
+color: var(--text-primary);
+margin: 8px 0 4px;
+}
+
+.plan-detail {
+font-size: 0.75rem;
+color: var(--text-muted);
+}
+
+.plan-interest {
+font-size: 0.78rem;
+margin-top: 8px;
+padding: 4px 8px;
+border-radius: 6px;
+display: inline-block;
+}
+
+.plan-card.aggressive .plan-interest { background: rgba(255,87,87,0.1); color: var(--danger); }
+.plan-card.balanced .plan-interest { background: rgba(0,229,160,0.1); color: var(--accent); }
+.plan-card.comfort .plan-interest { background: rgba(61,158,255,0.1); color: var(--info); }
+
+.recommended-badge {
+position: absolute;
+top: -1px; right: 12px;
+background: var(--accent);
+color: #0a2a1a;
+font-size: 0.65rem;
+font-weight: 800;
+padding: 3px 8px;
+border-radius: 0 0 8px 8px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+/* =============================================
+INSIGHT CARDS
+============================================= */
+.insights-list {
+display: flex;
+flex-direction: column;
+gap: 10px;
+margin-top: 16px;
+}
+
+.insight-item {
+display: flex;
+align-items: flex-start;
+gap: 12px;
+padding: 13px 16px;
+border-radius: var(--radius-md);
+font-size: 0.85rem;
+border: 1px solid transparent;
+animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.insight-item.green { background: rgba(0,229,160,0.06); border-color: rgba(0,229,160,0.15); color: var(--text-primary); }
+.insight-item.warn { background: rgba(255,176,32,0.06); border-color: rgba(255,176,32,0.15); color: var(--text-primary); }
+.insight-item.danger { background: rgba(255,87,87,0.06); border-color: rgba(255,87,87,0.15); color: var(--text-primary); }
+.insight-item.info { background: rgba(61,158,255,0.06); border-color: rgba(61,158,255,0.15); color: var(--text-primary); }
+
+.insight-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+/* =============================================
+PROGRESS BAR
+============================================= */
+.progress-bar-wrap {
+background: var(--bg-input);
+border-radius: 100px;
+height: 8px;
+overflow: hidden;
+margin-top: 8px;
+}
+
+.progress-bar-fill {
+height: 100%;
+border-radius: 100px;
+transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+background: linear-gradient(90deg, var(--accent), var(--accent-dim));
+}
+
+.progress-label {
+display: flex;
+justify-content: space-between;
+font-size: 0.78rem;
+color: var(--text-muted);
+margin-top: 6px;
+}
+
+/* =============================================
+TIMELINE VISUALIZATION
+============================================= */
+.timeline-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+gap: 6px;
+margin-top: 16px;
+}
+
+.timeline-month {
+aspect-ratio: 1;
+border-radius: var(--radius-sm);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+font-size: 0.65rem;
+font-weight: 600;
+font-family: var(--font-mono);
+border: 1px solid var(--border);
+transition: all var(--transition);
+cursor: default;
+background: var(--bg-input);
+color: var(--text-muted);
+}
+
+.timeline-month.filled {
+background: rgba(0, 229, 160, 0.08);
+border-color: rgba(0, 229, 160, 0.2);
+color: var(--accent);
+}
+
+.timeline-month.target {
+background: var(--accent);
+color: #0a2a1a;
+border-color: var(--accent);
+font-weight: 800;
+box-shadow: 0 0 16px rgba(0, 229, 160, 0.4);
+transform: scale(1.08);
+}
+
+/* =============================================
+CANVAS CHART
+============================================= */
+.chart-container {
+position: relative;
+margin-top: 16px;
+display: flex;
+justify-content: center;
+}
+
+canvas { max-width: 100%; }
+
+.chart-legend {
+display: flex;
+gap: 16px;
+flex-wrap: wrap;
+justify-content: center;
+margin-top: 14px;
+}
+
+.legend-item {
+display: flex;
+align-items: center;
+gap: 6px;
+font-size: 0.8rem;
+color: var(--text-secondary);
+}
+
+.legend-dot {
+width: 10px; height: 10px;
+border-radius: 3px;
+flex-shrink: 0;
+}
+
+/* =============================================
+TCO BIG NUMBER
+============================================= */
+.tco-hero {
+text-align: center;
+padding: 24px 0 16px;
+}
+
+.tco-label {
+font-size: 0.8rem;
+font-weight: 600;
+color: var(--text-muted);
+text-transform: uppercase;
+letter-spacing: 0.8px;
+margin-bottom: 8px;
+}
+
+.tco-number {
+font-family: var(--font-mono);
+font-size: clamp(2rem, 5vw, 3rem);
+font-weight: 700;
+letter-spacing: -2px;
+background: linear-gradient(135deg, var(--accent), var(--info));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.tco-breakdown {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+flex-wrap: wrap;
+}
+
+.tco-item {
+flex: 1;
+min-width: 100px;
+background: var(--bg-input);
+border-radius: var(--radius-md);
+padding: 14px;
+border: 1px solid var(--border);
+text-align: center;
+}
+
+.tco-item-label {
+font-size: 0.72rem;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: var(--text-muted);
+margin-bottom: 6px;
+}
+
+.tco-item-val {
+font-family: var(--font-mono);
+font-size: 1rem;
+font-weight: 700;
+color: var(--text-primary);
+}
+
+/* =============================================
+CURRENCY TOGGLE
+============================================= */
+.currency-toggle {
+display: flex;
+background: var(--bg-input);
+border: 1px solid var(--border);
+border-radius: 8px;
+padding: 3px;
+gap: 3px;
+}
+
+.currency-btn {
+padding: 5px 12px;
+border-radius: 6px;
+border: none;
+background: transparent;
+color: var(--text-muted);
+font-family: var(--font-mono);
+font-size: 0.82rem;
+font-weight: 600;
+cursor: pointer;
+transition: all var(--transition);
+}
+
+.currency-btn.active {
+background: var(--accent);
+color: #0a2a1a;
+}
+
+/* =============================================
+SECTION HEADING
+============================================= */
+.section-heading {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 24px;
+padding-bottom: 14px;
+border-bottom: 1px solid var(--border);
+}
+
+.section-num {
+font-family: var(--font-mono);
+font-size: 0.75rem;
+font-weight: 700;
+color: var(--accent);
+background: var(--accent-glow);
+padding: 4px 10px;
+border-radius: 6px;
+}
+
+.section-heading h2 {
+font-size: 1.35rem;
+font-weight: 800;
+letter-spacing: -0.5px;
+}
+
+/* =============================================
+AFFORDABILITY METER
+============================================= */
+.afford-meter {
+position: relative;
+height: 12px;
+background: var(--bg-input);
+border-radius: 100px;
+overflow: hidden;
+margin: 10px 0;
+}
+
+.afford-fill {
+height: 100%;
+border-radius: 100px;
+transition: width 0.6s ease, background 0.3s ease;
+}
+
+/* =============================================
+SECTION WRAPPER (for nav)
+============================================= */
+.section-wrapper {
+margin-bottom: 40px;
+scroll-margin-top: 90px;
+}
+
+/* =============================================
+FUEL TYPE SELECTOR
+============================================= */
+.fuel-selector {
+display: flex;
+gap: 8px;
+margin-bottom: 16px;
+}
+
+.fuel-btn {
+flex: 1;
+padding: 9px;
+border-radius: var(--radius-sm);
+border: 1px solid var(--border);
+background: var(--bg-input);
+color: var(--text-secondary);
+font-size: 0.82rem;
+font-weight: 600;
+cursor: pointer;
+transition: all var(--transition);
+text-align: center;
+}
+
+.fuel-btn:hover { border-color: var(--border-focus); color: var(--text-primary); }
+.fuel-btn.active { background: var(--accent-glow); border-color: rgba(0,229,160,0.35); color: var(--accent); }
+
+/* =============================================
+INCOME WARNING
+============================================= */
+.income-check {
+margin-top: 16px;
+padding: 14px;
+border-radius: var(--radius-md);
+font-size: 0.84rem;
+transition: all var(--transition);
+}
+
+.income-pct {
+font-family: var(--font-mono);
+font-size: 1.5rem;
+font-weight: 700;
+margin: 6px 0;
+}
+
+/* =============================================
+RESPONSIVE
+============================================= */
+@media (max-width: 900px) {
+.main-grid {
+grid-template-columns: 1fr;
+}
+.col-left, .col-right, .col-full { grid-column: 1; }
+.plans-grid { grid-template-columns: 1fr; }
+.sticky-summary { position: relative; top: 0; }
+}
+
+@media (max-width: 600px) {
+.card { padding: 20px; }
+.tco-breakdown { flex-direction: column; }
+.nav-actions { gap: 6px; }
+.brand-name { font-size: 1rem; }
+}
+
+/* =============================================
+ANIMATIONS
+============================================= */
+.fade-in {
+animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(12px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.number-change {
+animation: numFlash 0.3s ease-out;
+}
+
+@keyframes numFlash {
+0% { color: var(--accent); }
+100% { color: inherit; }
+}
+
+/* Dark mode toggle */
+.theme-toggle {
+display: flex;
+align-items: center;
+gap: 8px;
+cursor: pointer;
+background: var(--bg-card);
+border: 1px solid var(--border);
+border-radius: 100px;
+padding: 6px 14px;
+transition: all var(--transition);
+}
+
+.theme-toggle:hover { border-color: var(--border-focus); }
+
+.toggle-track {
+width: 32px; height: 18px;
+background: var(--bg-input);
+border-radius: 100px;
+position: relative;
+transition: background var(--transition);
+}
+
+[data-theme="light"] .toggle-track { background: var(--accent); }
+
+.toggle-knob {
+position: absolute;
+top: 2px; left: 2px;
+width: 14px; height: 14px;
+border-radius: 50%;
+background: var(--text-muted);
+transition: all var(--transition);
+}
+
+[data-theme="light"] .toggle-knob {
+left: 16px;
+background: white;
+}
+
+.toggle-label {
+font-size: 0.8rem;
+font-weight: 600;
+color: var(--text-secondary);
+}
+</style>
+</head>
+
+<body>
+<!-- ============================================
+TOP NAVIGATION
+============================================ -->
+<div class="top-nav">
+<div class="nav-brand">
+<div class="brand-icon">🚗</div>
+<div class="brand-name">AutoFinance<span>Pro</span></div>
+</div>
+<div class="nav-actions">
+<div class="currency-toggle">
+<button class="currency-btn active" id="currINR" onclick="setCurrency('INR')">₹</button>
+<button class="currency-btn" id="currUSD" onclick="setCurrency('USD')">$</button>
+</div>
+<button class="btn-icon theme-toggle" onclick="toggleTheme()">
+<div class="toggle-track"><div class="toggle-knob"></div></div>
+<span class="toggle-label" id="themeLabel">Dark</span>
+</button>
+<button class="btn-icon" onclick="loadDemo()">⚡ Demo</button>
+<button class="btn-icon" onclick="resetAll()">↺ Reset</button>
+</div>
+</div>
+
+<div class="app-wrapper">
+
+<!-- HERO -->
+<div class="hero fade-in">
+<div class="hero-badge">🎯 Smart Car Finance Planner</div>
+<h1>Know the real cost before you buy</h1>
+<p>EMI planning, running costs, savings timeline, and intelligent buying strategies — all in one.</p>
+</div>
+
+<!-- SECTION TABS -->
+<div class="section-tabs">
+<button class="tab-btn active" onclick="scrollToSection('loan')">💰 Loan Calculator</button>
+<button class="tab-btn" onclick="scrollToSection('strategy')">🧠 Smart Strategy</button>
+<button class="tab-btn" onclick="scrollToSection('savings')">📅 Savings Timeline</button>
+<button class="tab-btn" onclick="scrollToSection('running')">⛽ Running Cost</button>
+<button class="tab-btn" onclick="scrollToSection('maintenance')">🔧 Maintenance</button>
+<button class="tab-btn" onclick="scrollToSection('tco')">📊 Total Cost</button>
+</div>
+
+<!-- ==========================================
+MAIN LAYOUT
+========================================== -->
+<div style="display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start;">
+<!-- LEFT COLUMN -->
+<div>
+
+<!-- ==========================================
+SECTION 1: LOAN CALCULATOR
+========================================== -->
+<div class="section-wrapper" id="loan">
+<div class="section-heading">
+<span class="section-num">01</span>
+<h2>Car Price & Loan Calculator</h2>
+</div>
+
+<div class="main-grid">
+<!-- Car Price Inputs -->
+<div class="card fade-in" style="animation-delay:0.05s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">💰</div>
+<h2>Vehicle & Loan Setup</h2>
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+On-Road Price
+<span class="tooltip-icon" data-tip="Total price including taxes, registration & insurance">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx1">₹</span>
+<input type="number" class="input-field has-prefix" id="carPrice" placeholder="1500000" value="1500000" oninput="recalc()">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Down Payment
+<span class="tooltip-icon" data-tip="Recommended: 20–30% of on-road price">?</span>
+</div>
+<div class="slider-row" style="margin-bottom:8px">
+<div class="slider-track" id="dpSliderTrack">
+<div class="slider-fill" id="dpFill"></div>
+<div class="slider-thumb" id="dpThumb"></div>
+<input type="range" id="dpPercent" min="5" max="90" value="20" oninput="syncDP('pct')">
+</div>
+<div class="slider-value"><span id="dpPctLabel">20</span>%</div>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx2">₹</span>
+<input type="number" class="input-field has-prefix" id="dpAmount" placeholder="300000" oninput="syncDP('amt')">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Interest Rate (% per annum)
+<span class="tooltip-icon" data-tip="Car loan rates typically range from 7–14% p.a.">?</span>
+</div>
+<div class="slider-row">
+<div class="slider-track" id="rateSliderTrack">
+<div class="slider-fill" id="rateFill"></div>
+<div class="slider-thumb" id="rateThumb"></div>
+<input type="range" id="rateSlider" min="5" max="20" step="0.1" value="9" oninput="syncRate()">
+</div>
+<div class="slider-value"><span id="rateLabel">9.0</span>%</div>
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Loan Tenure
+<span class="tooltip-icon" data-tip="Longer tenure = lower EMI but more interest paid">?</span>
+</div>
+<select class="input-field" id="tenure" onchange="recalc()">
+<option value="1">1 Year</option>
+<option value="2">2 Years</option>
+<option value="3">3 Years</option>
+<option value="4">4 Years</option>
+<option value="5" selected>5 Years</option>
+<option value="6">6 Years</option>
+<option value="7">7 Years</option>
+</select>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Monthly Income (for EMI check)
+<span class="tooltip-icon" data-tip="We'll warn if EMI exceeds 35% of income">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx3">₹</span>
+<input type="number" class="input-field has-prefix" id="income" placeholder="80000" value="80000" oninput="recalc()">
+</div>
+</div>
+</div>
+
+<!-- Loan Results -->
+<div class="card fade-in" style="animation-delay:0.1s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">📈</div>
+<h2>Loan Summary</h2>
+</div>
+<span class="card-badge badge-green" id="loanHealthBadge">Healthy</span>
+</div>
+
+<div class="stat-grid">
+<div class="stat-box">
+<div class="stat-label">Loan Amount</div>
+<div class="stat-value mono" id="loanAmt">₹12,00,000</div>
+<div class="stat-sub" id="loanPct">80% financed</div>
+</div>
+<div class="stat-box stat-accent">
+<div class="stat-label">Monthly EMI</div>
+<div class="stat-value mono stat-accent" id="emiAmt">₹24,890</div>
+<div class="stat-sub" id="emiPctIncome">31% of income</div>
+</div>
+<div class="stat-box stat-warn">
+<div class="stat-label">Total Interest</div>
+<div class="stat-value mono" id="totalInterest">₹2,93,400</div>
+<div class="stat-sub" id="interestPct">24% extra</div>
+</div>
+<div class="stat-box stat-info">
+<div class="stat-label">Total Payment</div>
+<div class="stat-value mono" id="totalPayment">₹17,93,400</div>
+<div class="stat-sub">Principal + interest</div>
+</div>
+</div>
+
+<!-- Income check -->
+<div class="income-check" id="incomeCheck">
+<div style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">EMI-to-Income Ratio</div>
+<div class="income-pct" id="incomeRatio">—</div>
+<div class="afford-meter">
+<div class="afford-fill" id="affordFill" style="width:0%"></div>
+</div>
+<div id="incomeMsg" style="font-size:0.8rem; margin-top:6px;"></div>
+</div>
+
+<!-- Amortization hint -->
+<div style="margin-top:16px; padding: 14px; background: var(--bg-input); border-radius: var(--radius-md); border: 1px solid var(--border);">
+<div style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:10px;">Principal vs Interest Split</div>
+<div style="height:8px; background:var(--bg-base); border-radius:100px; overflow:hidden; display:flex; gap:2px;">
+<div id="principalBar" style="height:100%; background: var(--info); transition: width 0.5s ease; border-radius:100px 0 0 100px;"></div>
+<div id="interestBar" style="height:100%; background: var(--warn); transition: width 0.5s ease; border-radius:0 100px 100px 0;"></div>
+</div>
+<div style="display:flex; gap:16px; margin-top:8px; font-size:0.75rem; color:var(--text-muted);">
+<span>🔵 Principal: <strong id="principalPct" style="color:var(--info)">80%</strong></span>
+<span>🟡 Interest: <strong id="interestPct2" style="color:var(--warn)">20%</strong></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==========================================
+SECTION 2: SMART STRATEGY
+========================================== -->
+<div class="section-wrapper" id="strategy">
+<div class="section-heading">
+<span class="section-num">02</span>
+<h2>Smart Buying Strategy</h2>
+</div>
+
+<div class="card fade-in" style="animation-delay:0.15s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">🧠</div>
+<h2>AI-Like Buying Plans</h2>
+</div>
+<span class="card-badge badge-green">3 Plans Compared</span>
+</div>
+
+<div class="plans-grid" id="plansGrid">
+<!-- Populated by JS -->
+</div>
+
+<div class="insights-list" id="insightsList">
+<!-- Populated by JS -->
+</div>
+</div>
+</div>
+
+<!-- ==========================================
+SECTION 3: SAVINGS TIMELINE
+========================================== -->
+<div class="section-wrapper" id="savings">
+<div class="section-heading">
+<span class="section-num">03</span>
+<h2>Savings & Timeline Planner</h2>
+</div>
+
+<div class="main-grid">
+<div class="card fade-in" style="animation-delay:0.2s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">📅</div>
+<h2>Savings Plan</h2>
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Current Savings
+<span class="tooltip-icon" data-tip="How much you already have saved for the down payment">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx4">₹</span>
+<input type="number" class="input-field has-prefix" id="currentSavings" placeholder="100000" value="100000" oninput="recalc()">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Monthly Savings Capacity
+<span class="tooltip-icon" data-tip="How much can you save per month towards this goal">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx5">₹</span>
+<input type="number" class="input-field has-prefix" id="monthlySavings" placeholder="25000" value="25000" oninput="recalc()">
+</div>
+</div>
+
+<div class="stat-grid" style="grid-template-columns:1fr 1fr; margin-top:16px;">
+<div class="stat-box">
+<div class="stat-label">Down Payment Needed</div>
+<div class="stat-value mono" id="dpNeeded">₹3,00,000</div>
+</div>
+<div class="stat-box stat-accent">
+<div class="stat-label">Still Needed</div>
+<div class="stat-value mono" id="dpStillNeeded">₹2,00,000</div>
+</div>
+<div class="stat-box stat-info">
+<div class="stat-label">Months to Goal</div>
+<div class="stat-value mono" id="monthsToGoal">8 months</div>
+</div>
+<div class="stat-box stat-warn">
+<div class="stat-label">Best Buy Date</div>
+<div class="stat-value mono" id="bestBuyDate">Sep 2025</div>
+</div>
+</div>
+</div>
+
+<div class="card fade-in" style="animation-delay:0.25s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">📊</div>
+<h2>Month-by-Month Progress</h2>
+</div>
+</div>
+<div class="timeline-grid" id="timelineGrid">
+<!-- Populated by JS -->
+</div>
+<div style="display:flex; gap:12px; margin-top:12px; font-size:0.75rem; color:var(--text-muted); flex-wrap:wrap;">
+<span>⬜ Future savings</span>
+<span style="color:var(--accent)">🟩 Savings built</span>
+<span style="color:var(--accent); font-weight:700;">🎯 Target month</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==========================================
+SECTION 4: RUNNING COSTS
+========================================== -->
+<div class="section-wrapper" id="running">
+<div class="section-heading">
+<span class="section-num">04</span>
+<h2>Running Cost Calculator</h2>
+</div>
+
+<div class="main-grid">
+<div class="card fade-in" style="animation-delay:0.3s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">⛽</div>
+<h2>Fuel Costs</h2>
+</div>
+</div>
+
+<div class="fuel-selector" id="fuelSelector">
+<button class="fuel-btn active" onclick="setFuel('petrol', 102)">⛽ Petrol</button>
+<button class="fuel-btn" onclick="setFuel('diesel', 90)">🛢 Diesel</button>
+<button class="fuel-btn" onclick="setFuel('cng', 78)">💚 CNG</button>
+<button class="fuel-btn" onclick="setFuel('custom', null)">✏️ Custom</button>
+</div>
+
+<div class="field-group">
+<div class="field-label">Monthly Distance (km)</div>
+<div class="slider-row">
+<div class="slider-track" id="kmSliderTrack">
+<div class="slider-fill" id="kmFill"></div>
+<div class="slider-thumb" id="kmThumb"></div>
+<input type="range" id="kmSlider" min="200" max="5000" step="100" value="1500" oninput="syncKm()">
+</div>
+<div class="slider-value"><span id="kmLabel">1500</span></div>
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Fuel Efficiency (km/litre)
+<span class="tooltip-icon" data-tip="Real-world mileage. City driving ~15-18 kmpl">?</span>
+</div>
+<input type="number" class="input-field" id="mileage" value="16" oninput="recalc()">
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Fuel Price (per litre)
+<span class="tooltip-icon" data-tip="Current fuel price in your city">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx6">₹</span>
+<input type="number" class="input-field has-prefix" id="fuelPrice" value="102" oninput="recalc()">
+</div>
+</div>
+
+<div class="stat-grid" style="grid-template-columns:1fr 1fr;">
+<div class="stat-box">
+<div class="stat-label">Monthly Fuel</div>
+<div class="stat-value mono" id="monthlyFuel">₹9,563</div>
+</div>
+<div class="stat-box stat-warn">
+<div class="stat-label">Yearly Fuel</div>
+<div class="stat-value mono" id="yearlyFuel">₹1,14,750</div>
+</div>
+</div>
+</div>
+
+<!-- ==========================================
+SECTION 5: MAINTENANCE
+========================================== -->
+<div class="card fade-in" style="animation-delay:0.35s" id="maintenance">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">🔧</div>
+<h2>Maintenance Costs</h2>
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Annual Service Cost
+<span class="tooltip-icon" data-tip="Divide by 12 for monthly average">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx7">₹</span>
+<input type="number" class="input-field has-prefix" id="serviceAnnual" value="8000" oninput="recalc()">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">Monthly Car Wash</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx8">₹</span>
+<input type="number" class="input-field has-prefix" id="washMonthly" value="600" oninput="recalc()">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">
+Misc Monthly (tyres, oil, accessories)
+<span class="tooltip-icon" data-tip="Tyre replacement, polishing, car accessories, etc.">?</span>
+</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx9">₹</span>
+<input type="number" class="input-field has-prefix" id="miscMonthly" value="500" oninput="recalc()">
+</div>
+</div>
+
+<div class="field-group">
+<div class="field-label">Annual Insurance Premium</div>
+<div class="input-wrapper">
+<span class="input-prefix" id="pfx10">₹</span>
+<input type="number" class="input-field has-prefix" id="insurance" value="18000" oninput="recalc()">
+</div>
+</div>
+
+<div class="stat-grid" style="grid-template-columns:1fr 1fr;">
+<div class="stat-box">
+<div class="stat-label">Monthly Maintenance</div>
+<div class="stat-value mono" id="monthlyMaint">₹2,767</div>
+</div>
+<div class="stat-box stat-warn">
+<div class="stat-label">Yearly Maintenance</div>
+<div class="stat-value mono" id="yearlyMaint">₹33,200</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ==========================================
+SECTION 6: TOTAL COST OF OWNERSHIP
+========================================== -->
+<div class="section-wrapper" id="tco">
+<div class="section-heading">
+<span class="section-num">06</span>
+<h2>Total Cost of Ownership</h2>
+</div>
+
+<div class="card fade-in col-full" style="animation-delay:0.4s">
+<div class="card-header">
+<div class="card-title">
+<div class="card-icon">📊</div>
+<h2>Monthly Ownership Snapshot</h2>
+</div>
+<span class="card-badge badge-info">All-in Cost</span>
+</div>
+
+<div class="tco-hero">
+<div class="tco-label">Total Monthly Cost of Ownership</div>
+<div class="tco-number" id="tcoTotal">₹0</div>
+<div style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">Per year: <strong id="tcoYearly" style="color:var(--text-secondary)">₹0</strong></div>
+</div>
+
+<div class="tco-breakdown" id="tcoBreakdown">
+<!-- populated by JS -->
+</div>
+
+<!-- Chart -->
+<div class="chart-container" style="flex-direction:column; align-items:center;">
+<canvas id="tcoChart" width="280" height="280"></canvas>
+<div class="chart-legend" id="chartLegend"></div>
+</div>
+</div>
+</div>
+
+</div><!-- end left column -->
+
+<!-- ==========================================
+RIGHT COLUMN: STICKY SUMMARY
+========================================== -->
+<div>
+<div class="sticky-summary">
+<div class="sticky-title">Live Summary</div>
+
+<div class="summary-line">
+<span class="label">Car Price</span>
+<span class="val" id="sum_price">₹15,00,000</span>
+</div>
+<div class="summary-line">
+<span class="label">Down Payment</span>
+<span class="val" id="sum_dp">₹3,00,000</span>
+</div>
+<div class="summary-line">
+<span class="label">Loan Amount</span>
+<span class="val" id="sum_loan">₹12,00,000</span>
+</div>
+<div class="summary-line">
+<span class="label">Interest Rate</span>
+<span class="val" id="sum_rate">9%</span>
+</div>
+<div class="summary-line">
+<span class="label">Tenure</span>
+<span class="val" id="sum_tenure">5 yrs</span>
+</div>
+<div class="summary-line" style="border-top: 1px solid var(--border); padding-top: 12px;">
+<span class="label">Monthly EMI</span>
+<span class="val" id="sum_emi" style="color:var(--accent)">₹24,890</span>
+</div>
+<div class="summary-line">
+<span class="label">Fuel/month</span>
+<span class="val" id="sum_fuel">₹9,563</span>
+</div>
+<div class="summary-line">
+<span class="label">Maintenance/month</span>
+<span class="val" id="sum_maint">₹2,767</span>
+</div>
+
+<div class="summary-total">
+<div class="label">🚗 Total Monthly Outgo</div>
+<div class="big-val" id="sum_total">₹37,220</div>
+</div>
+
+<!-- Affordability gauge -->
+<div style="margin-top:18px;">
+<div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">
+<span>Affordability</span>
+<span id="affordPct">—</span>
+</div>
+<div class="progress-bar-wrap">
+<div class="progress-bar-fill" id="affordProgress" style="width:0%"></div>
+</div>
+<div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:4px;">
+<span>Safe (&lt;30%)</span>
+<span>High (50%+)</span>
+</div>
+</div>
+
+<!-- Savings progress -->
+<div style="margin-top:16px;">
+<div style="display:flex; justify-content:space-between; font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">
+<span>Down Payment Progress</span>
+<span id="dpProgress">—</span>
+</div>
+<div class="progress-bar-wrap">
+<div class="progress-bar-fill" id="dpProgressBar" style="width:0%; background: linear-gradient(90deg, var(--info), var(--accent));"></div>
+</div>
+</div>
+
+<div style="margin-top:20px; padding:14px; background:var(--bg-input); border-radius:var(--radius-md); border:1px solid var(--border);">
+<div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">5-Year Total Cost</div>
+<div style="display:flex; justify-content:space-between; font-size:0.83rem; margin-bottom:6px;">
+<span style="color:var(--text-secondary)">Loan repayment</span>
+<span class="mono" id="s5_loan">—</span>
+</div>
+<div style="display:flex; justify-content:space-between; font-size:0.83rem; margin-bottom:6px;">
+<span style="color:var(--text-secondary)">Fuel (5 yrs)</span>
+<span class="mono" id="s5_fuel">—</span>
+</div>
+<div style="display:flex; justify-content:space-between; font-size:0.83rem; padding-top:8px; border-top:1px solid var(--border); font-weight:700;">
+<span style="color:var(--text-primary)">Grand Total</span>
+<span class="mono" style="color:var(--accent)" id="s5_total">—</span>
+</div>
+</div>
+</div>
+</div>
+
+</div><!-- end two-col grid -->
+
+</div><!-- end app-wrapper -->
+
+<script>
+/* =============================================
+STATE
+============================================= */
+let state = {
+currency: 'INR',
+sym: '₹',
+rate: 1,
+// Inputs
+carPrice: 1500000,
+dpPct: 20,
+dpAmt: 300000,
+interestRate: 9,
+tenure: 5,
+income: 80000,
+currentSavings: 100000,
+monthlySavings: 25000,
+km: 1500,
+mileage: 16,
+fuelPrice: 102,
+serviceAnnual: 8000,
+washMonthly: 600,
+miscMonthly: 500,
+insurance: 18000,
+};
+
+/* =============================================
+CURRENCY
+============================================= */
+function setCurrency(c) {
+state.currency = c;
+state.sym = c === 'INR' ? '₹' : '$';
+state.rate = c === 'INR' ? 1 : 0.012;
+document.getElementById('currINR').classList.toggle('active', c === 'INR');
+document.getElementById('currUSD').classList.toggle('active', c === 'USD');
+// Update all prefix symbols
+['pfx1','pfx2','pfx3','pfx4','pfx5','pfx6','pfx7','pfx8','pfx9','pfx10'].forEach(id => {
+const el = document.getElementById(id);
+if (el) el.textContent = state.sym;
+});
+recalc();
+}
+
+/* =============================================
+FORMAT NUMBER
+============================================= */
+function fmt(n, decimals = 0) {
+const v = n * state.rate;
+if (state.currency === 'INR') {
+return state.sym + formatIndian(Math.round(v));
+}
+return state.sym + v.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function formatIndian(num) {
+const s = num.toString();
+const lastThree = s.slice(-3);
+const rest = s.slice(0, s.length - 3);
+if (rest === '') return lastThree;
+return rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree;
+}
+
+function raw(id) {
+return parseFloat(document.getElementById(id).value) || 0;
+}
+
+/* =============================================
+EMI FORMULA
+============================================= */
+function calcEMI(principal, annualRate, years) {
+if (annualRate === 0) return principal / (years * 12);
+const r = annualRate / 100 / 12;
+const n = years * 12;
+return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+}
+
+/* =============================================
+SLIDER SYNC HELPERS
+============================================= */
+function updateSliderUI(trackId, fillId, thumbId, pct) {
+const p = Math.max(0, Math.min(100, pct));
+document.getElementById(fillId).style.width = p + '%';
+document.getElementById(thumbId).style.left = p + '%';
+}
+
+function syncDP(source) {
+const price = raw('carPrice');
+if (source === 'pct') {
+const pct = parseFloat(document.getElementById('dpPercent').value);
+state.dpPct = pct;
+state.dpAmt = price * pct / 100;
+document.getElementById('dpAmount').value = Math.round(state.dpAmt);
+document.getElementById('dpPctLabel').textContent = pct;
+} else {
+const amt = raw('dpAmount');
+state.dpAmt = amt;
+state.dpPct = price > 0 ? (amt / price) * 100 : 0;
+const pct = Math.min(90, Math.max(5, Math.round(state.dpPct)));
+document.getElementById('dpPercent').value = pct;
+document.getElementById('dpPctLabel').textContent = Math.round(state.dpPct);
+}
+updateSliderUI('dpSliderTrack','dpFill','dpThumb', state.dpPct);
+recalc();
+}
+
+function syncRate() {
+const r = parseFloat(document.getElementById('rateSlider').value);
+state.interestRate = r;
+document.getElementById('rateLabel').textContent = r.toFixed(1);
+updateSliderUI('rateSliderTrack','rateFill','rateThumb', ((r - 5) / 15) * 100);
+recalc();
+}
+
+function syncKm() {
+const km = parseInt(document.getElementById('kmSlider').value);
+state.km = km;
+document.getElementById('kmLabel').textContent = km;
+updateSliderUI('kmSliderTrack','kmFill','kmThumb', ((km - 200) / 4800) * 100);
+recalc();
+}
+
+/* =============================================
+FUEL TYPE
+============================================= */
+function setFuel(type, price) {
+document.querySelectorAll('.fuel-btn').forEach(b => b.classList.remove('active'));
+event.target.classList.add('active');
+if (price !== null) {
+document.getElementById('fuelPrice').value = price;
+}
+recalc();
+}
+
+/* =============================================
+MAIN RECALCULATE
+============================================= */
+function recalc() {
+// Read all inputs
+const price = raw('carPrice');
+const dp = raw('dpAmount') || (price * raw('dpPercent') / 100);
+const rate = parseFloat(document.getElementById('rateSlider').value);
+const tenure = parseInt(document.getElementById('tenure').value);
+const income = raw('income');
+const curSav = raw('currentSavings');
+const monSav = raw('monthlySavings');
+const km = parseInt(document.getElementById('kmSlider').value) || 1500;
+const mileage = raw('mileage') || 16;
+const fuelP = raw('fuelPrice');
+const servAnn = raw('serviceAnnual');
+const wash = raw('washMonthly');
+const misc = raw('miscMonthly');
+const ins = raw('insurance');
+
+// Loan
+const loanAmt = Math.max(0, price - dp);
+const emi = calcEMI(loanAmt, rate, tenure);
+const totalPayment = emi * tenure * 12;
+const totalInterest = totalPayment - loanAmt;
+const dpPct = price > 0 ? (dp / price * 100).toFixed(1) : 0;
+const emiPctInc = income > 0 ? (emi / income * 100) : 0;
+
+// Running
+const litersPerMonth = km / mileage;
+const monthlyFuel = litersPerMonth * fuelP;
+const yearlyFuel = monthlyFuel * 12;
+
+// Maintenance
+const monthlyMaint = (servAnn / 12) + wash + misc + (ins / 12);
+const yearlyMaint = monthlyMaint * 12;
+
+// TCO
+const monthlyTCO = emi + monthlyFuel + monthlyMaint;
+const yearlyTCO = monthlyTCO * 12;
+
+// Savings timeline
+const dpNeeded = dp;
+const gap = Math.max(0, dpNeeded - curSav);
+const monthsNeeded = monSav > 0 ? Math.ceil(gap / monSav) : 999;
+
+// ---- UPDATE DOM ----
+
+// Loan section
+setText('loanAmt', fmt(loanAmt));
+setText('loanPct', `${(100 - dpPct)}% financed`);
+setText('emiAmt', fmt(emi));
+setText('emiPctIncome', `${emiPctInc.toFixed(0)}% of income`);
+setText('totalInterest', fmt(totalInterest));
+setText('interestPct', `${loanAmt > 0 ? ((totalInterest/loanAmt)*100).toFixed(0) : 0}% extra`);
+setText('totalPayment', fmt(totalPayment));
+
+// Principal/interest bars
+const prinPct = loanAmt > 0 ? (loanAmt / totalPayment * 100) : 80;
+const intPct = 100 - prinPct;
+document.getElementById('principalBar').style.width = prinPct.toFixed(0) + '%';
+document.getElementById('interestBar').style.width = intPct.toFixed(0) + '%';
+setText('principalPct', prinPct.toFixed(0) + '%');
+setText('interestPct2', intPct.toFixed(0) + '%');
+
+// Income check
+updateIncomeCheck(emi, income, emiPctInc);
+
+// Loan health badge
+const badge = document.getElementById('loanHealthBadge');
+if (emiPctInc < 25 && dpPct >= 20) {
+badge.textContent = '✅ Healthy'; badge.className = 'card-badge badge-green';
+} else if (emiPctInc > 40 || dpPct < 15) {
+badge.textContent = '⚠️ High Risk'; badge.className = 'card-badge badge-warn';
+} else {
+badge.textContent = '🔵 Moderate'; badge.className = 'card-badge badge-info';
+}
+
+// Fuel & maintenance
+setText('monthlyFuel', fmt(monthlyFuel));
+setText('yearlyFuel', fmt(yearlyFuel));
+setText('monthlyMaint', fmt(monthlyMaint));
+setText('yearlyMaint', fmt(yearlyMaint));
+
+// TCO
+setText('tcoTotal', fmt(monthlyTCO));
+setText('tcoYearly', fmt(yearlyTCO));
+updateTCOBreakdown(emi, monthlyFuel, monthlyMaint);
+drawPieChart(emi, monthlyFuel, monthlyMaint);
+
+// Savings
+setText('dpNeeded', fmt(dpNeeded));
+setText('dpStillNeeded', fmt(gap));
+setText('monthsToGoal', gap <= 0 ? '✅ Ready!' : `${monthsNeeded} months`);
+const buyDate = getTargetDate(monthsNeeded);
+setText('bestBuyDate', gap <= 0 ? 'Now!' : buyDate);
+buildTimeline(monthsNeeded, curSav, monSav, dpNeeded);
+
+// Sticky summary
+setText('sum_price', fmt(price));
+setText('sum_dp', fmt(dp));
+setText('sum_loan', fmt(loanAmt));
+setText('sum_rate', rate.toFixed(1) + '%');
+setText('sum_tenure', tenure + ' yrs');
+setText('sum_emi', fmt(emi));
+setText('sum_fuel', fmt(monthlyFuel));
+setText('sum_maint', fmt(monthlyMaint));
+setText('sum_total', fmt(monthlyTCO));
+
+// Affordability progress
+const affPct = income > 0 ? Math.min(100, (monthlyTCO / income * 100)) : 0;
+document.getElementById('affordProgress').style.width = affPct + '%';
+const affColor = affPct < 35 ? 'var(--accent)' : affPct < 50 ? 'var(--warn)' : 'var(--danger)';
+document.getElementById('affordProgress').style.background = `linear-gradient(90deg, ${affColor}, ${affColor}cc)`;
+setText('affordPct', affPct.toFixed(0) + '% of income');
+
+// DP progress bar
+const dpProg = Math.min(100, curSav / dpNeeded * 100);
+document.getElementById('dpProgressBar').style.width = dpProg + '%';
+setText('dpProgress', dpProg.toFixed(0) + '% saved');
+
+// 5 year summary
+setText('s5_loan', fmt(totalPayment));
+setText('s5_fuel', fmt(yearlyFuel * 5));
+setText('s5_total', fmt(totalPayment + yearlyFuel * 5 + yearlyMaint * 5));
+
+// Smart plans
+buildPlans(price, dp, rate, income, loanAmt, totalInterest, emi, tenure);
+buildInsights(price, dp, loanAmt, rate, emi, income, totalInterest, monthlyTCO, monthsNeeded, emiPctInc, dpPct);
+
+// Update slider fills (in case price changed)
+const pctDP = parseFloat(document.getElementById('dpPercent').value);
+updateSliderUI('dpSliderTrack','dpFill','dpThumb', pctDP);
+updateSliderUI('rateSliderTrack','rateFill','rateThumb', ((rate - 5) / 15) * 100);
+updateSliderUI('kmSliderTrack','kmFill','kmThumb', ((km - 200) / 4800) * 100);
+}
+
+function setText(id, val) {
+const el = document.getElementById(id);
+if (!el) return;
+if (el.textContent !== val) {
+el.textContent = val;
+el.classList.remove('number-change');
+void el.offsetWidth;
+el.classList.add('number-change');
+}
+}
+
+/* =============================================
+INCOME CHECK
+============================================= */
+function updateIncomeCheck(emi, income, pct) {
+const box = document.getElementById('incomeCheck');
+const fill = document.getElementById('affordFill');
+const ratio = document.getElementById('incomeRatio');
+const msg = document.getElementById('incomeMsg');
+
+ratio.textContent = income > 0 ? pct.toFixed(1) + '%' : '—';
+fill.style.width = Math.min(100, pct) + '%';
+
+if (pct < 25) {
+box.style.background = 'rgba(0,229,160,0.06)';
+box.style.border = '1px solid rgba(0,229,160,0.2)';
+fill.style.background = 'var(--accent)';
+msg.innerHTML = '✅ <strong>Excellent!</strong> EMI is well within safe limits.';
+msg.style.color = 'var(--accent)';
+} else if (pct < 35) {
+box.style.background = 'rgba(61,158,255,0.06)';
+box.style.border = '1px solid rgba(61,158,255,0.15)';
+fill.style.background = 'var(--info)';
+msg.innerHTML = '🔵 <strong>Acceptable.</strong> EMI is within recommended range.';
+msg.style.color = 'var(--info)';
+} else if (pct < 50) {
+box.style.background = 'rgba(255,176,32,0.06)';
+box.style.border = '1px solid rgba(255,176,32,0.15)';
+fill.style.background = 'var(--warn)';
+msg.innerHTML = '⚠️ <strong>Caution.</strong> EMI exceeds 35% of income. Consider higher DP or longer tenure.';
+msg.style.color = 'var(--warn)';
+} else {
+box.style.background = 'rgba(255,87,87,0.06)';
+box.style.border = '1px solid rgba(255,87,87,0.15)';
+fill.style.background = 'var(--danger)';
+msg.innerHTML = '🚨 <strong>High Risk!</strong> EMI is over 50% of income. Reconsider your plan.';
+msg.style.color = 'var(--danger)';
+}
+}
+
+/* =============================================
+SMART PLANS
+============================================= */
+function buildPlans(price, dp, rate, income, loan, totalInt, currEmi, currTenure) {
+const plans = [
+{ id: 'aggressive', tenure: 3, label: 'Aggressive', emoji: '⚡', desc: 'Low tenure, high EMI, minimum interest' },
+{ id: 'balanced', tenure: 5, label: 'Balanced', emoji: '⚖️', desc: 'Sweet spot of EMI & interest (Recommended)', rec: true },
+{ id: 'comfort', tenure: 7, label: 'Comfort', emoji: '😌', desc: 'Low EMI, comfortable monthly outgo' },
+];
+
+const html = plans.map(p => {
+const emi = calcEMI(loan, rate, p.tenure);
+const total = emi * p.tenure * 12;
+const interest = total - loan;
+const incPct = income > 0 ? (emi / income * 100).toFixed(0) : 0;
+
+return `
+<div class="plan-card ${p.id} ${p.rec ? 'recommended' : ''}">
+${p.rec ? '<div class="recommended-badge">⭐ Best</div>' : ''}
+<div class="plan-name">${p.emoji} ${p.label}</div>
+<div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:4px;">${p.desc}</div>
+<div class="plan-emi">${fmt(emi)}<span style="font-size:0.65rem; font-weight:500; color:var(--text-muted)">/mo</span></div>
+<div class="plan-detail">${p.tenure} yr tenure · ${incPct}% of income</div>
+<div class="plan-interest">${fmt(interest)} total interest</div>
+</div>
+`;
+}).join('');
+
+document.getElementById('plansGrid').innerHTML = html;
+}
+
+/* =============================================
+INSIGHTS ENGINE
+============================================= */
+function buildInsights(price, dp, loan, rate, emi, income, totalInt, monthlyTCO, monthsNeeded, emiPct, dpPct) {
+const insights = [];
+const sym = state.sym;
+
+// DP insight
+const idealDP = price * 0.25;
+if (dp < price * 0.2) {
+const extraDP = idealDP - dp;
+const newLoan = price - idealDP;
+const currentEMI = calcEMI(loan, rate, parseInt(document.getElementById('tenure').value));
+const newEMI = calcEMI(newLoan, rate, parseInt(document.getElementById('tenure').value));
+const savingsOnEMI = (currentEMI - newEMI) * parseInt(document.getElementById('tenure').value) * 12;
+insights.push({
+type: 'warn',
+icon: '💡',
+text: `Increase down payment by <strong>${fmt(extraDP)}</strong> to 25% — you'll save approx. <strong>${fmt(savingsOnEMI)}</strong> in total interest.`
+});
+} else if (dpPct >= 30) {
+insights.push({ type: 'green', icon: '✅', text: `Great down payment of ${dpPct}%! Keeps your loan and interest burden low.` });
+}
+
+// EMI:income warning
+if (emiPct > 40) {
+insights.push({
+type: 'danger', icon: '🚨',
+text: `EMI is ${emiPct.toFixed(0)}% of income — well above the safe 35% threshold. Consider a higher down payment, longer tenure, or waiting until income grows.`
+});
+} else if (emiPct > 30) {
+insights.push({
+type: 'warn', icon: '⚠️',
+text: `EMI is ${emiPct.toFixed(0)}% of your income. Try to keep it under 30% for financial breathing room.`
+});
+}
+
+// Total monthly cost vs income
+const tcoIncomePct = income > 0 ? (monthlyTCO / income * 100) : 0;
+if (tcoIncomePct > 60) {
+insights.push({
+type: 'danger', icon: '🔴',
+text: `Total monthly car ownership (EMI + fuel + maintenance) is <strong>${tcoIncomePct.toFixed(0)}%</strong> of income. This leaves very little for other expenses.`
+});
+}
+
+// Interest overpay
+if (totalInt > loan * 0.3) {
+insights.push({
+type: 'warn', icon: '💰',
+text: `You're paying <strong>${fmt(totalInt)}</strong> in interest — that's ${((totalInt/loan)*100).toFixed(0)}% of the loan amount. A shorter tenure could reduce this significantly.`
+});
+} else if (totalInt < loan * 0.15) {
+insights.push({ type: 'green', icon: '👍', text: `Interest outgo is reasonable at ${fmt(totalInt)} — good tenure choice!` });
+}
+
+// Savings timeline
+if (monthsNeeded > 12) {
+insights.push({
+type: 'info', icon: '⏳',
+text: `At current savings rate, it'll take <strong>${monthsNeeded} months</strong> to accumulate the down payment. Consider increasing monthly savings.`
+});
+} else if (monthsNeeded <= 0) {
+insights.push({ type: 'green', icon: '🎉', text: `You already have enough savings for the down payment. You're ready to buy now!` });
+}
+
+// Rate insight
+const r = parseFloat(document.getElementById('rateSlider').value);
+if (r > 11) {
+insights.push({
+type: 'warn', icon: '📈',
+text: `Interest rate of ${r}% is on the higher side. Try negotiating with your bank or check for lower rate offers — even 1% less saves significantly.`
+});
+}
+
+if (insights.length === 0) {
+insights.push({ type: 'green', icon: '🌟', text: 'Your plan looks well-balanced! Adjust any inputs to see personalized insights.' });
+}
+
+const html = insights.map(i => `
+<div class="insight-item ${i.type}">
+<span class="insight-icon">${i.icon}</span>
+<span>${i.text}</span>
+</div>
+`).join('');
+
+document.getElementById('insightsList').innerHTML = html;
+}
+
+/* =============================================
+SAVINGS TIMELINE
+============================================= */
+function getTargetDate(months) {
+const d = new Date();
+d.setMonth(d.getMonth() + months);
+return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+}
+
+function buildTimeline(monthsNeeded, curSav, monSav, dpNeeded) {
+const grid = document.getElementById('timelineGrid');
+if (monthsNeeded > 48 || monthsNeeded <= 0) {
+if (monthsNeeded <= 0) {
+grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--accent); font-weight:700; padding:20px;">🎉 Ready to buy now!</div>';
+} else {
+grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted); font-size:0.82rem; padding:20px;">Timeline too long to display. Increase monthly savings capacity.</div>';
+}
+return;
+}
+
+const months = Math.max(monthsNeeded, 6);
+const today = new Date();
+let html = '';
+
+for (let i = 0; i <= months; i++) {
+const d = new Date(today);
+d.setMonth(d.getMonth() + i);
+const label = d.toLocaleDateString('en-IN', { month: 'short' }).slice(0,3);
+const savingsNow = Math.min(dpNeeded, curSav + monSav * i);
+const pct = (savingsNow / dpNeeded * 100).toFixed(0);
+const isTarget = i === monthsNeeded;
+const isFilled = i < monthsNeeded;
+
+html += `
+<div class="timeline-month ${isTarget ? 'target' : isFilled ? 'filled' : ''}" title="${label} — ${fmt(savingsNow)} saved (${pct}%)">
+<span>${label}</span>
+<span style="font-size:0.6rem">${pct}%</span>
+</div>`;
+}
+grid.innerHTML = html;
+}
+
+/* =============================================
+TCO BREAKDOWN
+============================================= */
+function updateTCOBreakdown(emi, fuel, maint) {
+const total = emi + fuel + maint;
+const pcts = total > 0 ? {
+emi: (emi/total*100).toFixed(0),
+fuel: (fuel/total*100).toFixed(0),
+maint: (maint/total*100).toFixed(0)
+} : { emi:0, fuel:0, maint:0 };
+
+document.getElementById('tcoBreakdown').innerHTML = `
+<div class="tco-item">
+<div class="tco-item-label">🏦 Loan EMI</div>
+<div class="tco-item-val">${fmt(emi)}</div>
+<div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">${pcts.emi}% of total</div>
+<div class="progress-bar-wrap" style="margin-top:8px;"><div class="progress-bar-fill" style="width:${pcts.emi}%; background:var(--accent)"></div></div>
+</div>
+<div class="tco-item">
+<div class="tco-item-label">⛽ Fuel</div>
+<div class="tco-item-val">${fmt(fuel)}</div>
+<div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">${pcts.fuel}% of total</div>
+<div class="progress-bar-wrap" style="margin-top:8px;"><div class="progress-bar-fill" style="width:${pcts.fuel}%; background:var(--warn)"></div></div>
+</div>
+<div class="tco-item">
+<div class="tco-item-label">🔧 Maintenance</div>
+<div class="tco-item-val">${fmt(maint)}</div>
+<div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">${pcts.maint}% of total</div>
+<div class="progress-bar-wrap" style="margin-top:8px;"><div class="progress-bar-fill" style="width:${pcts.maint}%; background:var(--info)"></div></div>
+</div>
+`;
+}
+
+/* =============================================
+PIE CHART (Pure Canvas)
+============================================= */
+function drawPieChart(emi, fuel, maint) {
+const canvas = document.getElementById('tcoChart');
+const ctx = canvas.getContext('2d');
+const total = emi + fuel + maint;
+if (total === 0) return;
+
+const dpr = window.devicePixelRatio || 1;
+const size = Math.min(window.innerWidth > 600 ? 240 : 200, 240);
+canvas.style.width = size + 'px';
+canvas.style.height = size + 'px';
+canvas.width = size * dpr;
+canvas.height = size * dpr;
+ctx.scale(dpr, dpr);
+
+const cx = size / 2, cy = size / 2;
+const r = size * 0.38;
+const innerR = size * 0.22;
+
+const theme = document.documentElement.getAttribute('data-theme');
+const slices = [
+{ val: emi, color: '#00e5a0', label: 'EMI' },
+{ val: fuel, color: '#ffb020', label: 'Fuel' },
+{ val: maint,color: '#3d9eff', label: 'Maintenance' },
+];
+
+ctx.clearRect(0, 0, size, size);
+
+// Draw segments
+let startAngle = -Math.PI / 2;
+slices.forEach((s, i) => {
+const angle = (s.val / total) * 2 * Math.PI;
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.arc(cx, cy, r, startAngle, startAngle + angle);
+ctx.closePath();
+ctx.fillStyle = s.color;
+ctx.fill();
+
+// Gap
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.arc(cx, cy, r + 2, startAngle - 0.01, startAngle + angle + 0.01);
+ctx.fillStyle = theme === 'dark' ? '#161b22' : '#ffffff';
+ctx.fill();
+
+startAngle += angle;
+});
+
+// Redraw clean segments
+startAngle = -Math.PI / 2;
+slices.forEach(s => {
+const angle = (s.val / total) * 2 * Math.PI;
+ctx.beginPath();
+ctx.moveTo(cx, cy);
+ctx.arc(cx, cy, r, startAngle + 0.03, startAngle + angle - 0.03);
+ctx.closePath();
+ctx.fillStyle = s.color;
+ctx.fill();
+startAngle += angle;
+});
+
+// Inner circle (donut)
+ctx.beginPath();
+ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+ctx.fillStyle = theme === 'dark' ? '#161b22' : '#ffffff';
+ctx.fill();
+
+// Center text
+ctx.fillStyle = theme === 'dark' ? '#f0f4f8' : '#0f1923';
+ctx.textAlign = 'center';
+ctx.font = `bold ${size * 0.06}px 'DM Mono', monospace`;
+ctx.fillText(fmt(total), cx, cy - 4);
+ctx.font = `${size * 0.042}px 'DM Sans', sans-serif`;
+ctx.fillStyle = theme === 'dark' ? '#8b9ab0' : '#5a6778';
+ctx.fillText('/month', cx, cy + size * 0.06);
+
+// Legend
+document.getElementById('chartLegend').innerHTML = slices.map(s =>
+`<div class="legend-item">
+<div class="legend-dot" style="background:${s.color}"></div>
+<span>${s.label}: <strong>${fmt(s.val)}</strong> (${(s.val/total*100).toFixed(0)}%)</span>
+</div>`
+).join('');
+}
+
+/* =============================================
+THEME TOGGLE
+============================================= */
+function toggleTheme() {
+const html = document.documentElement;
+const current = html.getAttribute('data-theme');
+const next = current === 'dark' ? 'light' : 'dark';
+html.setAttribute('data-theme', next);
+document.getElementById('themeLabel').textContent = next === 'dark' ? 'Dark' : 'Light';
+setTimeout(recalc, 50); // redraw chart
+}
+
+/* =============================================
+NAVIGATION
+============================================= */
+function scrollToSection(id) {
+document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+document.querySelectorAll('.tab-btn').forEach((b, i) => {
+b.classList.toggle('active', ['loan','strategy','savings','running','maintenance','tco'][i] === id);
+});
+}
+
+/* =============================================
+DEMO DATA
+============================================= */
+function loadDemo() {
+document.getElementById('carPrice').value = 1200000;
+document.getElementById('dpAmount').value = 240000;
+document.getElementById('dpPercent').value = 20;
+document.getElementById('rateSlider').value = 8.5;
+document.getElementById('tenure').value = 5;
+document.getElementById('income').value = 70000;
+document.getElementById('currentSavings').value = 120000;
+document.getElementById('monthlySavings').value = 20000;
+document.getElementById('kmSlider').value = 1200;
+document.getElementById('mileage').value = 17;
+document.getElementById('fuelPrice').value = 102;
+document.getElementById('serviceAnnual').value = 7500;
+document.getElementById('washMonthly').value = 500;
+document.getElementById('miscMonthly').value = 400;
+document.getElementById('insurance').value = 16000;
+syncDP('amt');
+syncRate();
+syncKm();
+recalc();
+}
+
+/* =============================================
+RESET
+============================================= */
+function resetAll() {
+document.getElementById('carPrice').value = 1500000;
+document.getElementById('dpAmount').value = 300000;
+document.getElementById('dpPercent').value = 20;
+document.getElementById('rateSlider').value = 9;
+document.getElementById('tenure').value = 5;
+document.getElementById('income').value = 80000;
+document.getElementById('currentSavings').value = 100000;
+document.getElementById('monthlySavings').value = 25000;
+document.getElementById('kmSlider').value = 1500;
+document.getElementById('mileage').value = 16;
+document.getElementById('fuelPrice').value = 102;
+document.getElementById('serviceAnnual').value = 8000;
+document.getElementById('washMonthly').value = 600;
+document.getElementById('miscMonthly').value = 500;
+document.getElementById('insurance').value = 18000;
+syncDP('amt');
+syncRate();
+syncKm();
+recalc();
+}
+
+/* =============================================
+INIT
+============================================= */
+document.addEventListener('DOMContentLoaded', () => {
+// Initial sync
+syncDP('pct');
+syncRate();
+syncKm();
+recalc();
+
+// Watch car price to auto-update DP
+document.getElementById('carPrice').addEventListener('input', () => {
+syncDP('pct');
+});
+
+// Intersection observer for tab highlighting
+const sections = ['loan','strategy','savings','running','tco'];
+const tabs = document.querySelectorAll('.tab-btn');
+const observer = new IntersectionObserver(entries => {
+entries.forEach(entry => {
+if (entry.isIntersecting) {
+const idx = sections.indexOf(entry.target.id);
+if (idx >= 0) {
+tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+}
+});
+}, { threshold: 0.3 });
+
+sections.forEach(id => {
+const el = document.getElementById(id);
+if (el) observer.observe(el);
+});
+});
+</script>
+</body>
+</html>
